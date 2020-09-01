@@ -29,7 +29,7 @@ public class Function {
      * 1. curl -d "HTTP Body" {your host}/api/HttpExample
      * 2. curl "{your host}/api/HttpExample?name=HTTP%20Query"
      */
-    @FunctionName("form")
+    @FunctionName("scan")
     public HttpResponseMessage run(
             @HttpTrigger(
                 name = "req",
@@ -54,18 +54,31 @@ public class Function {
                     .version(Version.HTTP_2)
                     .build();
             //byte[] localImageBytes = Files.readAllBytes(Paths.get("/Users/richard_lui/temp/Vincent/docs/"+filename));
-            URI uri = new URI("https://scan5354.blob.core.windows.net/scan/"+filename);
+            //URI uri = new URI("https://scan5354.blob.core.windows.net/scan/"+filename);
+            //URI uri = new URI("https://scan5354.blob.core.windows.net/1467/1467_001.pdf");
             //uri.toURL().openStream().readAllBytes()
-            byte[] localImageBytes = uri.toURL().openStream().readAllBytes();
+            //byte[] localImageBytes = uri.toURL().openStream().readAllBytes();
             
             HttpRequest httpRequest = HttpRequest.newBuilder()
-                    //.uri(URI.create("https://ocr-dev-09238.cognitiveservices.azure.com/vision/v3.0/read/analyze?language=en"))
-                    .uri(URI.create("https://ocr-dev-09238.cognitiveservices.azure.com/vision/v3.1-preview.1/read/analyze?language=zh-Hans"))
+                    .uri(URI.create("https://form5354.cognitiveservices.azure.com/formrecognizer/v2.1-preview.1/custom/models/3bd942b1-c49a-4d20-99aa-de199e61fa15/analyze"))
+                    //.uri(URI.create("https://ocr-dev-09238.cognitiveservices.azure.com/vision/v3.1-preview.1/read/analyze?language=zh-Hans"))
                     .timeout(Duration.ofSeconds(30))
-                    .method("POST", BodyPublishers.ofByteArray(localImageBytes))
-                    .header("Content-Type",  "application/octet-stream")
-                    .header("Ocp-Apim-Subscription-Key", "3c9c8481044648d5957f7bbb08377693")
+                    .method("POST", BodyPublishers.ofString("{\"source\":\"https://scan5354.blob.core.windows.net/1467/1467_001.pdf\"}"))
+                    .header("Content-Type",  "application/json")
+                    .header("Ocp-Apim-Subscription-Key", "21e521f9cb774acd8f295fbcb986d064")
                     .build();
+            
+            /*
+             * HttpRequest httpRequest = HttpRequest.newBuilder() //.uri(URI.create(
+             * "https://ocr-dev-09238.cognitiveservices.azure.com/vision/v3.0/read/analyze?language=en"
+             * )) .uri(URI.create(
+             * "https://ocr-dev-09238.cognitiveservices.azure.com/vision/v3.1-preview.1/read/analyze?language=zh-Hans"
+             * )) .timeout(Duration.ofSeconds(30)) .method("POST",
+             * BodyPublishers.ofByteArray(localImageBytes)) .header("Content-Type",
+             * "application/octet-stream") .header("Ocp-Apim-Subscription-Key",
+             * "3c9c8481044648d5957f7bbb08377693") .build();
+             */
+            
             HttpResponse<String> response = null;
             try {
                 System.out.println("postHttpRequest uri: " +  httpRequest.uri() + " request headers: " + httpRequest.headers());
@@ -81,7 +94,7 @@ public class Function {
                 errorMsg = e.getMessage();
             }
             
-            Thread.sleep(10000);
+            Thread.sleep(15000);
             
             // get the read result operation id
             String url = response.headers().firstValue("operation-location").get();
@@ -90,7 +103,8 @@ public class Function {
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(30))
                     .GET()
-                    .header("Ocp-Apim-Subscription-Key", "3c9c8481044648d5957f7bbb08377693")
+                    //.header("Ocp-Apim-Subscription-Key", "3c9c8481044648d5957f7bbb08377693")
+                    .header("Ocp-Apim-Subscription-Key", "21e521f9cb774acd8f295fbcb986d064")
                     .build();
             response = null;
             String body = "";
@@ -110,12 +124,20 @@ public class Function {
             }
             
             //extractCompanyName(body);
-            
+            ScanProcessor processor = null;
             if (filename.equals("1464_001.pdf")) {
-                ScanProcessor processor = new ProStretchProcessor(body);
+                processor = new ProStretchProcessor(body);
+                processor.process();
+                System.out.println("PONumber = " + processor.getPoNumber());
+            } else  if (filename.startsWith("1467")) {
+                processor = new IdealProcessor(body);
                 processor.process();
                 System.out.println("PONumber = " + processor.getPoNumber());
             }
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("PONumber=").append(processor.getPoNumber());
+            
             if (errorFound) {
                 return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(errorMsg)

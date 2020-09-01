@@ -24,6 +24,17 @@
             <artifactId>azure-functions-java-library</artifactId>
             <version>${azure.functions.java.library.version}</version>
         </dependency>
+        <dependency>
+          <groupId>com.azure</groupId>
+          <artifactId>azure-ai-formrecognizer</artifactId>
+          <version>3.0.0</version>
+          <exclusions>
+            <exclusion>
+              <groupId>com.azure</groupId>
+              <artifactId>azure-core-http-netty</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
 
         <!-- Test -->
         <dependency>
