@@ -8,6 +8,9 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.pegasus.form.processor.IdealProcessor;
+import com.pegasus.form.processor.ProStretchProcessor;
+import com.pegasus.form.processor.FormProcessor;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -123,20 +126,7 @@ public class Function {
                 errorMsg = e.getMessage();
             }
             
-            //extractCompanyName(body);
-            ScanProcessor processor = null;
-            if (filename.equals("1464_001.pdf")) {
-                processor = new ProStretchProcessor(body);
-                processor.process();
-                System.out.println("PONumber = " + processor.getPoNumber());
-            } else  if (filename.startsWith("1467")) {
-                processor = new IdealProcessor(body);
-                processor.process();
-                System.out.println("PONumber = " + processor.getPoNumber());
-            }
-            
-            StringBuilder sb = new StringBuilder();
-            sb.append("PONumber=").append(processor.getPoNumber());
+           
             
             if (errorFound) {
                 return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
