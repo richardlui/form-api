@@ -51,7 +51,8 @@ public class Function2 {
         final String query = request.getQueryParameters().get("filename");
         final String filename = request.getBody().orElse(query);
 
-        String formUrl = "https://scan5354.blob.core.windows.net/1466/" + filename;
+        //String formUrl = "https://scan5354.blob.core.windows.net/1466/" + filename;
+        String formUrl = "https://intelliform.blob.core.windows.net/analyze/" + filename;
         String modelId = Configuration.getModelId(filename);
         
         SyncPoller<FormRecognizerOperationResult, List<RecognizedForm>> recognizeFormPoller =

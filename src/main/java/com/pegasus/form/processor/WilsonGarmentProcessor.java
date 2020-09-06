@@ -42,7 +42,6 @@ public class WilsonGarmentProcessor extends FormProcessor {
             // print table details
             form.getPages().forEach((page)-> {
                 for (FormTable table : page.getTables()) {
-                    int rowCount = table.getRowCount();
                     int currentRow = 0;
                     int currentColumn = 0;
                     Boolean newRow = true;
