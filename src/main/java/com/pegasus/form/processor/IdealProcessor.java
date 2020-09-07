@@ -1,8 +1,10 @@
 package com.pegasus.form.processor;
 
 import java.util.List;
+import java.util.Map;
 
 import com.azure.ai.formrecognizer.models.RecognizedForm;
+import com.pegasus.form.model.LineItem;
 
 public class IdealProcessor extends FormProcessor {
 
@@ -15,13 +17,13 @@ public class IdealProcessor extends FormProcessor {
     }
     
     @Override
-    public String extractLabel(List<RecognizedForm> forms) {
-        return "PO#32414141";
+    public Map<String, String> extractLabel(List<RecognizedForm> forms) {
+        return null;
     }
     
     @Override
-    public String extractLineItems(List<RecognizedForm> forms) {
-        return "table";
+    public List<LineItem> extractLineItems(List<RecognizedForm> forms) {
+        return null;
     }
     
 }

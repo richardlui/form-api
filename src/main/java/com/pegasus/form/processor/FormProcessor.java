@@ -2,16 +2,18 @@ package com.pegasus.form.processor;
 
 import com.azure.ai.formrecognizer.models.RecognizedForm;
 import com.pegasus.form.model.LineItem;
+import com.pegasus.form.model.PackingList;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class FormProcessor {
     
     private String jsonResult;
-    private String labels;
+    private Map<String, String> labels;
     private List<RecognizedForm> forms;
+    private PackingList plist;
     private List<LineItem> lineItems;
-    private String table;
     
     public FormProcessor(String result) {
         this.jsonResult = result;
@@ -21,36 +23,23 @@ public abstract class FormProcessor {
         this.forms = forms;
     }
     
-    public List<LineItem> getLineItems() {
-        return lineItems;
+    public PackingList getPackingList() {
+        return plist;
     }
-
-    public String getLabels() {
-        return labels;
-    }
-
-    public void setLabels(String labels) {
-        this.labels = labels;
-    }
-
-    public String getTable() {
-        return table;
-    }
-
-    public void setTable(String table) {
-        this.table = table;
-    }
-
+    
     public void process() {
         labels = extractLabel(forms);
-        table = extractLineItems(forms);
+        lineItems = extractLineItems(forms);
+        plist = new PackingList();
+        plist.setCompany(labels.get("Company"));
+        plist.setDate(labels.get("Date"));
+        plist.setLineItems(lineItems);
     }
     
     public String getJsonResult() {
         return jsonResult;
     }
     
-    abstract String extractLabel(List<RecognizedForm> forms);
-    abstract String extractLineItems(List<RecognizedForm> forms);
-    
+    abstract Map<String, String> extractLabel(List<RecognizedForm> forms);
+    abstract List<LineItem> extractLineItems(List<RecognizedForm> forms);
 }
