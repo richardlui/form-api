@@ -9,6 +9,7 @@ import com.azure.ai.formrecognizer.models.FormRecognizerOperationResult;
 import com.azure.ai.formrecognizer.models.RecognizedForm;
 import com.azure.core.credential.AzureKeyCredential;
 import com.azure.core.util.polling.SyncPoller;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
@@ -21,16 +22,20 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.pegasus.form.processor.ProStretchProcessor;
 import com.pegasus.form.processor.WilsonGarmentProcessor;
 import com.pegasus.form.processor.FormProcessor;
+import com.pegasus.form.processor.FormProcessorV2;
 
 /**
  * Azure Functions with HTTP Trigger.
  */
 public class Function2 {
-    /**
-     * This function listens at endpoint "/api/HttpExample". Two ways to invoke it using "curl" command in bash:
-     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
-     * 2. curl "{your host}/api/form?filename=1466_002.pdf"
-     */
+   
+    private static ObjectMapper mapper = null;
+    
+    static {
+        mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(Include.NON_NULL);
+    }
+    
     @FunctionName("form")
     public HttpResponseMessage run(
             @HttpTrigger(
@@ -58,20 +63,25 @@ public class Function2 {
         List<RecognizedForm> recognizedForms = recognizeFormPoller.getFinalResult();
 
         FormProcessor processor = null;
+        FormProcessorV2 processor2 = null;
+        String entity = null;
         if (filename.startsWith("1464")) {
-            processor = new ProStretchProcessor(recognizedForms);
-            processor.process();
+            processor2 = new ProStretchProcessor(recognizedForms);
+            processor2.process();
+            
+            try {
+                entity = mapper.writeValueAsString(processor2.getContainer());
+            } catch (Exception e) {
+                System.out.println("Error while converting to json");
+            }
         } else  if (filename.startsWith("1466")) {
             processor = new WilsonGarmentProcessor(recognizedForms);
             processor.process();
-        }
-        
-        String entity = null;
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            entity = mapper.writeValueAsString(processor.getPackingList());
-        } catch (Exception e) {
-            System.out.println("Error while converting to json");
+            try {
+                entity = mapper.writeValueAsString(processor.getPackingList());
+            } catch (Exception e) {
+                System.out.println("Error while converting to json");
+            }
         }
         if (entity != null) {
             return request.createResponseBuilder(HttpStatus.OK)

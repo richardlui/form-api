@@ -9,10 +9,17 @@ import com.azure.ai.formrecognizer.models.FormPage;
 import com.azure.ai.formrecognizer.models.FormTable;
 import com.azure.ai.formrecognizer.models.FormTableCell;
 import com.azure.ai.formrecognizer.models.RecognizedForm;
+import com.pegasus.form.model.Container;
 import com.pegasus.form.model.LineItem;
+import com.pegasus.form.model.PackingList;
 
-public class ProStretchProcessor extends FormProcessor {
+public class ProStretchProcessor extends FormProcessorV2 {
 
+    private static final String ISSUE_DATE_KEY = "issueDate";
+    private static final String SELLER_NAME_KEY = "sellerName";
+    private static final String BUYER_NAME_KEY = "buyerName";
+    private static final String INVOICE_NUM_KEY = "invoiceNumber";
+    
     public ProStretchProcessor(String result) {
         super(result);
     }
@@ -43,55 +50,57 @@ public class ProStretchProcessor extends FormProcessor {
     }
     
     @Override
-    public List<LineItem> extractLineItems(List<RecognizedForm> forms) {
-        List<LineItem> list = new ArrayList<>();
+    public Container extractLineItems(List<RecognizedForm> forms,
+            Map<String, String> labels) {
+        Container container = new Container();
         for (int i = 0; i < forms.size(); i++) {
             RecognizedForm form = forms.get(i);
             // print table details
-            for (FormPage page : form.getPages()) {
-                // Ignore first table which is shipping info
-                // read second table only
-                if (page.getTables().size() > 1) {
-                    FormTable table = page.getTables().get(1);
-                    int currentRow = -1;
-                    Boolean newRow = true;
-                    int skipRowIndex = -1;
-                    LineItem lineItem = null;
-                    for (FormTableCell cell : table.getCells()) {
-                        if (currentRow != cell.getRowIndex()) {
-                            newRow = true;
-                            // Add previous item
-                            if (lineItem != null) {
-                                list.add(lineItem);
-                            }
-                            // Create a new item for the new row
-                            lineItem = new LineItem();
-                        } else {
-                            newRow =false;
-                        }
-                        currentRow = cell.getRowIndex();
-                        
-                        // skip any blank row
-                        if (newRow && cell.getColumnIndex() != 0) {
-                            skipRowIndex = currentRow;
-                            continue;
-                        }
-                        if (cell.getRowIndex() == skipRowIndex) {
-                            continue;
-                        }
-                        
-                        processCell(lineItem, cell);
-                        
+            FormPage page = form.getPages().get(0);
+            // skip the first table
+            FormTable table = page.getTables().get(1);
+            int currentRow = -1;
+            Boolean newRow = true;
+            int skipRowIndex = -1;
+            PackingList lineItem = null;
+            for (FormTableCell cell : table.getCells()) {
+                if (currentRow != cell.getRowIndex()) {
+                    newRow = true;
+                    // Add previous item
+                    if (lineItem != null) {
+                        container.getPackingList().add(lineItem);
                     }
-                    // add the last item
-                    list.add(lineItem);
+                    // Create a new item for the new row
+                    lineItem = new PackingList();
+                    lineItem.setIssueDate(labels.get(ISSUE_DATE_KEY));
+                    lineItem.setBuyerName(labels.get(BUYER_NAME_KEY));
+                    lineItem.setSellerName(labels.get(SELLER_NAME_KEY));
+                    lineItem.setInvoiceDate(labels.get(ISSUE_DATE_KEY));
+                    lineItem.setInvoiceNumber(labels.get(INVOICE_NUM_KEY));
+                } else {
+                    newRow =false;
                 }
+                currentRow = cell.getRowIndex();
+                
+                // skip any blank row
+                if (newRow && cell.getColumnIndex() != 0) {
+                    skipRowIndex = currentRow;
+                    continue;
+                }
+                if (cell.getRowIndex() == skipRowIndex) {
+                    continue;
+                }
+                
+                processCell(lineItem, cell);
+                
             }
+            // add the last item
+            container.getPackingList().add(lineItem);
         }
-        return list;
+        return container;
     }
     
-    private void splitPurchaseOrder(LineItem lineItem, String text) {
+    private void splitPurchaseOrder(PackingList lineItem, String text) {
         StringBuilder sb = new StringBuilder();
         int index = text.indexOf(" ");
         String po = text.substring(0, index);
@@ -99,12 +108,14 @@ public class ProStretchProcessor extends FormProcessor {
         sb.append("================================================================\n");
         sb.append("PO: ").append(po).append("\n");
         sb.append("Item No: ").append(desc).append("\n");
-        lineItem.withPoNumber(po)
-            .withItemNumber(desc);
+        lineItem.setPackageNumber(po);
+        lineItem.setMaterialReferenceNumber(desc);
+        //lineItem.withPoNumber(po)
+        //    .withItemNumber(desc);
         System.out.println(sb.toString());
     }
     
-    private void processCell(LineItem lineItem, FormTableCell cell) {
+    private void processCell(PackingList lineItem, FormTableCell cell) {
         StringBuilder sb = new StringBuilder();
         switch(cell.getColumnIndex()) {
             case 0:
@@ -112,15 +123,28 @@ public class ProStretchProcessor extends FormProcessor {
                 break;
             case 3:
                 sb.append("Description: ").append(cell.getText()).append("\n");
-                lineItem.setDescription(cell.getText());
+                lineItem.setMaterialDescription(cell.getText());
                 break;
             case 4:
-                lineItem.setQuantity(cell.getText());
+                lineItem.setShippedQuantity(cell.getText());
                 sb.append("Quantity: ").append(cell.getText()).append("\n");
+                break;
+            case 6:
+                lineItem.setShippedUOM(cell.getText());
+                sb.append("Quantity UOM: ").append(cell.getText()).append("\n");
                 break;
             case 8:
                 lineItem.setNetWeight(cell.getText());
                 sb.append("Net Weight: ").append(cell.getText()).append("\n");
+                break;
+            case 9:
+                lineItem.setGrossWeight(cell.getText());
+                sb.append("Gross Weight: ").append(cell.getText()).append("\n");
+                break;
+            case 10:
+                lineItem.setLength(cell.getText());
+                lineItem.setLengthUOM("cm");
+                sb.append("Gross Weight: ").append(cell.getText()).append("\n");
                 break;
             default:
                 break;
