@@ -108,7 +108,7 @@ public class ProStretchProcessor extends FormProcessorV2 {
         sb.append("================================================================\n");
         sb.append("PO: ").append(po).append("\n");
         sb.append("Item No: ").append(desc).append("\n");
-        lineItem.setPackageNumber(po);
+        lineItem.setOrderNumber(po);
         lineItem.setMaterialReferenceNumber(desc);
         //lineItem.withPoNumber(po)
         //    .withItemNumber(desc);
@@ -119,29 +119,33 @@ public class ProStretchProcessor extends FormProcessorV2 {
         StringBuilder sb = new StringBuilder();
         switch(cell.getColumnIndex()) {
             case 0:
-                splitPurchaseOrder(lineItem, cell.getText());
+                //splitPurchaseOrder(lineItem, cell.getText());
+                lineItem.setOrderNumber(cell.getText());
                 break;
-            case 3:
+            case 1:
+                lineItem.setMaterialReferenceNumber(cell.getText());
+                break;
+            case 5:
                 sb.append("Description: ").append(cell.getText()).append("\n");
                 lineItem.setMaterialDescription(cell.getText());
                 break;
-            case 4:
+            case 10:
                 lineItem.setShippedQuantity(cell.getText());
                 sb.append("Quantity: ").append(cell.getText()).append("\n");
                 break;
-            case 6:
+            case 12:
                 lineItem.setShippedUOM(cell.getText());
                 sb.append("Quantity UOM: ").append(cell.getText()).append("\n");
                 break;
-            case 8:
+            case 14:
                 lineItem.setNetWeight(cell.getText());
                 sb.append("Net Weight: ").append(cell.getText()).append("\n");
                 break;
-            case 9:
+            case 15:
                 lineItem.setGrossWeight(cell.getText());
                 sb.append("Gross Weight: ").append(cell.getText()).append("\n");
                 break;
-            case 10:
+            case 16:
                 lineItem.setLength(cell.getText());
                 lineItem.setLengthUOM("cm");
                 sb.append("Gross Weight: ").append(cell.getText()).append("\n");

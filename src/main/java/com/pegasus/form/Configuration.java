@@ -22,13 +22,12 @@ public class Configuration {
         MODEL_ID_MAP.put("1466_001.pdf", "657d5ca6-a751-44ef-9e4a-d9c29f5c1f59");
         MODEL_ID_MAP.put("1466_002.pdf", "657d5ca6-a751-44ef-9e4a-d9c29f5c1f59");
         MODEL_ID_MAP.put("Wilson", "657d5ca6-a751-44ef-9e4a-d9c29f5c1f59");
-        //MODEL_ID_MAP.put("1464_001.pdf", "5e37be0c-14db-4bd4-b773-69f7c6067580");
-        MODEL_ID_MAP.put("1464_001.pdf", "be1a8063-41b0-4f89-9ae9-b2609c46451f");
+        //MODEL_ID_MAP.put("1464_001.pdf", "be1a8063-41b0-4f89-9ae9-b2609c46451f");
         MODEL_ID_MAP.put("YRC", "45691059-8ac7-45e4-b4fa-a20a063a3bc0");
 
         // 2.1 model
         //MODEL_ID_MAP.put("Ideal", "3bd942b1-c49a-4d20-99aa-de199e61fa15");
-        //MODEL_ID_MAP.put("1464_001.pdf", "ef8c1c50-7a59-48d1-a680-d0493f219ccb");
+        MODEL_ID_MAP.put("1464_001.pdf", "2efeb896-b0f0-41bf-a9e6-9908b4362b30");
        
     }
     
