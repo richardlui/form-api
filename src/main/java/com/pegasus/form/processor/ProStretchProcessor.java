@@ -120,43 +120,48 @@ public class ProStretchProcessor extends FormProcessorV2 {
     }
     
     private void processCell(PackingList lineItem, FormTableCell cell) {
-        StringBuilder sb = new StringBuilder();
         switch(cell.getColumnIndex()) {
             case 0:
-                //splitPurchaseOrder(lineItem, cell.getText());
                 lineItem.setOrderNumber(cell.getText());
                 break;
             case 1:
                 lineItem.setMaterialReferenceNumber(cell.getText());
                 break;
+            case 2:
+                lineItem.setCountryOfOrigin(cell.getText());
+                break;
             case 5:
-                sb.append("Description: ").append(cell.getText()).append("\n");
                 lineItem.setMaterialDescription(cell.getText());
+                break;
+            case 6:
+                lineItem.setMaterialColor(cell.getText());
                 break;
             case 10:
                 lineItem.setShippedQuantity(cell.getText());
-                sb.append("Quantity: ").append(cell.getText()).append("\n");
                 break;
             case 12:
                 lineItem.setShippedUOM(cell.getText());
-                sb.append("Quantity UOM: ").append(cell.getText()).append("\n");
                 break;
             case 14:
                 lineItem.setNetWeight(cell.getText());
-                sb.append("Net Weight: ").append(cell.getText()).append("\n");
                 break;
             case 15:
                 lineItem.setGrossWeight(cell.getText());
-                sb.append("Gross Weight: ").append(cell.getText()).append("\n");
                 break;
             case 16:
                 lineItem.setLength(cell.getText());
                 lineItem.setLengthUOM("cm");
-                sb.append("Gross Weight: ").append(cell.getText()).append("\n");
+                break;
+            case 17:
+                lineItem.setWidth(cell.getText());
+                lineItem.setWidthUOM("cm");
+                break;
+            case 18:
+                lineItem.setHeight(cell.getText());
+                lineItem.setHeightUOM("cm");
                 break;
             default:
                 break;
         }
-        System.out.println(sb.toString());
     }
 }
