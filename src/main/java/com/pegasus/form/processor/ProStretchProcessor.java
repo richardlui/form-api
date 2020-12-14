@@ -1,6 +1,5 @@
 package com.pegasus.form.processor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import com.azure.ai.formrecognizer.models.FormTable;
 import com.azure.ai.formrecognizer.models.FormTableCell;
 import com.azure.ai.formrecognizer.models.RecognizedForm;
 import com.pegasus.form.model.Container;
-import com.pegasus.form.model.LineItem;
 import com.pegasus.form.model.PackingList;
 
 public class ProStretchProcessor extends FormProcessorV2 {
@@ -60,8 +58,6 @@ public class ProStretchProcessor extends FormProcessorV2 {
             // Scan thru the first table
             FormTable table = page.getTables().get(0);
             int currentRow = -1;
-            Boolean newRow = true;
-            int skipRowIndex = -1;
             PackingList lineItem = null;
             for (FormTableCell cell : table.getCells()) {
                 // skip first line which is the header
@@ -69,7 +65,6 @@ public class ProStretchProcessor extends FormProcessorV2 {
                     continue;
                 }
                 if (currentRow != cell.getRowIndex()) {
-                    newRow = true;
                     // Add previous item
                     if (lineItem != null) {
                         container.getPackingList().add(lineItem);
@@ -78,22 +73,12 @@ public class ProStretchProcessor extends FormProcessorV2 {
                     lineItem = new PackingList();
                     lineItem.setIssueDate(labels.get(ISSUE_DATE_KEY));
                     lineItem.setBuyerName(labels.get(BUYER_NAME_KEY));
+                    lineItem.setShipToName(labels.get(BUYER_NAME_KEY));
                     lineItem.setSellerName(labels.get(SELLER_NAME_KEY));
                     lineItem.setInvoiceDate(labels.get(ISSUE_DATE_KEY));
                     lineItem.setInvoiceNumber(labels.get(INVOICE_NUM_KEY));
-                } else {
-                    newRow =false;
                 }
                 currentRow = cell.getRowIndex();
-                
-                // skip any blank row
-                if (newRow && cell.getColumnIndex() != 0) {
-                    skipRowIndex = currentRow;
-                    continue;
-                }
-                if (cell.getRowIndex() == skipRowIndex) {
-                    continue;
-                }
                 
                 processCell(lineItem, cell);
                 

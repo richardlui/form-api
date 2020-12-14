@@ -1,31 +1,32 @@
 package com.pegasus.form.model;
 
 public class PackingList {
-    private String issueDate;
-    private String orderNumber;
-    private String buyerName;
+    // default to NULL for mandatory fields
+    private String issueDate = "NULL";
+    private String orderNumber = "NULL";
+    private String buyerName = "NULL";
     private String contactPerson;
-    private String shipToName;
-    private String shipToCode;
-    private String sellerName;
+    private String shipToName = "NULL";
+    private String shipToCode = "NULL";
+    private String sellerName = "NULL";
     private String actualManufacturerName;
-    private String actualManufacturerCode;
-    private String countryOfOrigin;
+    private String actualManufacturerCode = "NULL";
+    private String countryOfOrigin = "NULL";
     private String T1Customer;
     private String currency;
-    private String packingListNumber;
-    private String packingListDate;
+    private String packingListNumber = "NULL";
+    private String packingListDate = "NULL";
     private String invoiceNumber;
     private String invoiceDate;
     private String closingDate;
     private String vessel;
     private String etdOfPortLoading;
     private String finalShipMode;
-    private String qrCode;
+    private String qrCode = "NULL";
     private String lineItemNumber;
-    private String materialReferenceNumber;
+    private String materialReferenceNumber = "NULL";
     private String materialDescription;
-    private String materialColor;
+    private String materialColor = "NULL";
     private String weight;
     private String weightUOM;
     private String width;
@@ -39,9 +40,9 @@ public class PackingList {
     private String size;
     private String unitPrice;
     private String batchNumber;
-    private String packageNumber;
-    private String shippedQuantity;
-    private String shippedUOM;
+    private String packageNumber = "NULL";
+    private String shippedQuantity = "NULL";
+    private String shippedUOM = "NULL";
     private String compensateDefectQuantity;
     private String compensateDefectUOM;
     private String netWeight;

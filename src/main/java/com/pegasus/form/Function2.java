@@ -21,6 +21,7 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.pegasus.form.processor.FormProcessorFactory;
 import com.pegasus.form.processor.FormProcessorV2;
+import com.pegasus.form.property.PropertyManager;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -32,6 +33,7 @@ public class Function2 {
     static {
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(Include.NON_NULL);
+        PropertyManager.load();
     }
     
     @FunctionName("form")
@@ -45,8 +47,8 @@ public class Function2 {
         context.getLogger().info("Java HTTP trigger processed a request.");
 
         FormRecognizerClient formRecognizerClient = new FormRecognizerClientBuilder()
-                .credential(new AzureKeyCredential(Configuration.FORM_API_KEY))
-                .endpoint(Configuration.FORM_ENDPOINT)
+                .credential(new AzureKeyCredential(Configuration.getFormApiKey()))
+                .endpoint(Configuration.getFormEndPoint())
                 .buildClient();
         
         final String filename = request.getQueryParameters().get("filename");
@@ -57,8 +59,8 @@ public class Function2 {
                     .build();
         }
 
-        String formUrl = "https://intelliform.blob.core.windows.net/analyze/" + companyCode.toLowerCase() + "/" + filename;
-        String modelId = Configuration.getModelId(filename);
+        String formUrl = Configuration.getFormBlobContainerUrl() + "/analyze/" + companyCode.toLowerCase() + "/" + filename;
+        String modelId = Configuration.getModelId(companyCode.toLowerCase());
         
         SyncPoller<FormRecognizerOperationResult, List<RecognizedForm>> recognizeFormPoller =
             formRecognizerClient.beginRecognizeCustomFormsFromUrl(modelId, formUrl);
