@@ -16,11 +16,11 @@ import static org.mockito.Mockito.*;
 /**
  * Unit test for Function class.
  */
-public class FunctionTest {
+public class FunctionTest2 {
     /**
      * Unit test for HttpTriggerJava method.
      */
-    @Test
+    //@Test
     public void testHttpTriggerJava() throws Exception {
         // Setup
         @SuppressWarnings("unchecked")

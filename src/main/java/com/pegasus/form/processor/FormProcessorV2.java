@@ -11,16 +11,14 @@ public abstract class FormProcessorV2 {
     
     private String jsonResult;
     private Map<String, String> labels;
-    private List<RecognizedForm> forms;
     private PackingList plist;
     private Container container;
     
+    public FormProcessorV2() {
+    }
+
     public FormProcessorV2(String result) {
         this.jsonResult = result;
-    }
-    
-    public FormProcessorV2(List<RecognizedForm> forms) {
-        this.forms = forms;
     }
     
     public PackingList getPackingList() {
@@ -31,7 +29,7 @@ public abstract class FormProcessorV2 {
         return container;
     }
     
-    public void process() {
+    public void process(List<RecognizedForm> forms) {
         labels = extractLabel(forms);
         container = extractLineItems(forms, labels);
         //plist = new PackingList();

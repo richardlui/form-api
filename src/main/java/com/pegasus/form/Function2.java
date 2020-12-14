@@ -19,9 +19,7 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-import com.pegasus.form.processor.ProStretchProcessor;
-import com.pegasus.form.processor.WilsonGarmentProcessor;
-import com.pegasus.form.processor.FormProcessor;
+import com.pegasus.form.processor.FormProcessorFactory;
 import com.pegasus.form.processor.FormProcessorV2;
 
 /**
@@ -51,10 +49,15 @@ public class Function2 {
                 .endpoint(Configuration.FORM_ENDPOINT)
                 .buildClient();
         
-        final String query = request.getQueryParameters().get("filename");
-        final String filename = request.getBody().orElse(query);
+        final String filename = request.getQueryParameters().get("filename");
+        final String companyCode = request.getQueryParameters().get("company_code");
+        if (filename == null || companyCode == null) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+                    .body("Either filename or company_code query parameter is missing")
+                    .build();
+        }
 
-        String formUrl = "https://intelliform.blob.core.windows.net/analyze/" + filename;
+        String formUrl = "https://intelliform.blob.core.windows.net/analyze/" + companyCode.toLowerCase() + "/" + filename;
         String modelId = Configuration.getModelId(filename);
         
         SyncPoller<FormRecognizerOperationResult, List<RecognizedForm>> recognizeFormPoller =
@@ -62,27 +65,16 @@ public class Function2 {
 
         List<RecognizedForm> recognizedForms = recognizeFormPoller.getFinalResult();
 
-        FormProcessor processor = null;
-        FormProcessorV2 processor2 = null;
+        FormProcessorV2 processor2 = FormProcessorFactory.getInstance(companyCode);
         String entity = null;
-        if (filename.startsWith("1464")) {
-            processor2 = new ProStretchProcessor(recognizedForms);
-            processor2.process();
-            
-            try {
-                entity = mapper.writeValueAsString(processor2.getContainer());
-            } catch (Exception e) {
-                System.out.println("Error while converting to json");
-            }
-        } else  if (filename.startsWith("1466")) {
-            processor = new WilsonGarmentProcessor(recognizedForms);
-            processor.process();
-            try {
-                entity = mapper.writeValueAsString(processor.getPackingList());
-            } catch (Exception e) {
-                System.out.println("Error while converting to json");
-            }
+
+        processor2.process(recognizedForms);
+        try {
+            entity = mapper.writeValueAsString(processor2.getContainer());
+        } catch (Exception e) {
+            System.out.println("Error while converting to json");
         }
+
         if (entity != null) {
             return request.createResponseBuilder(HttpStatus.OK)
                 .body(entity)

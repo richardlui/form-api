@@ -20,12 +20,12 @@ public class ProStretchProcessor extends FormProcessorV2 {
     private static final String BUYER_NAME_KEY = "buyerName";
     private static final String INVOICE_NUM_KEY = "invoiceNumber";
     
+    public ProStretchProcessor() {
+        super();
+    }
+
     public ProStretchProcessor(String result) {
         super(result);
-    }
-    
-    public ProStretchProcessor(List<RecognizedForm> forms) {
-        super(forms);
     }
     
     @Override
@@ -55,15 +55,19 @@ public class ProStretchProcessor extends FormProcessorV2 {
         Container container = new Container();
         for (int i = 0; i < forms.size(); i++) {
             RecognizedForm form = forms.get(i);
-            // print table details
+            // Take the first page only
             FormPage page = form.getPages().get(0);
-            // skip the first table
-            FormTable table = page.getTables().get(1);
+            // Scan thru the first table
+            FormTable table = page.getTables().get(0);
             int currentRow = -1;
             Boolean newRow = true;
             int skipRowIndex = -1;
             PackingList lineItem = null;
             for (FormTableCell cell : table.getCells()) {
+                // skip first line which is the header
+                if (cell.getRowIndex() == 0) {
+                    continue;
+                }
                 if (currentRow != cell.getRowIndex()) {
                     newRow = true;
                     // Add previous item
