@@ -41,7 +41,6 @@ public class Function {
 
         // Parse query parameter
         final String query = request.getQueryParameters().get("filename");
-        final String filename = request.getBody().orElse(query);
         Boolean errorFound = false;
         String errorMsg = "";
 

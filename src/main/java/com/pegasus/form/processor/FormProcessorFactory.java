@@ -1,11 +1,17 @@
 package com.pegasus.form.processor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FormProcessorFactory {
     
+    private static Map<String, FormProcessorV2> processorMap = new HashMap<>();
+    static {
+        processorMap.put("prostretch", new ProStretchProcessor());
+    }
+
     public static FormProcessorV2 getInstance(String companyCode) {
-        if (companyCode.equalsIgnoreCase("prostretch")) {
-            return new ProStretchProcessor();
-        }
-        return null;
+        FormProcessorV2 formProcessor = processorMap.get(companyCode.toLowerCase());
+        return formProcessor;
     }
 }
